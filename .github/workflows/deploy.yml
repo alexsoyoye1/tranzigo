@@ -1,0 +1,27 @@
+name: Deploy Tranzigo
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Install sshpass
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sshpass
+
+      - name: Sync to VPS via root/password
+        env:
+          HOST: ${{ secrets.VPS_HOST }}
+          PASS: ${{ secrets.ROOT_PASSWORD }}
+          REMOTE_PATH: /home/admin/web/tranzigo.locker/public_html
+        run: |
+          sshpass -p "$PASS" rsync -avz --delete \
+            ./ root@"$HOST":"$REMOTE_PATH"
